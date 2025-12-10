@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدیریت هزینه های ماهانه</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #10b981;
+      --danger: #ef4444;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      direction: rtl;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      padding: 15px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      padding: 25px 0;
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      width: 3px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .btn-danger:active {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e0e7ff;
+      color: var(--primary);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0 0 8px 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .suggestions.show {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      background: white;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.9rem;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:active {
+      background: #f3f4f6;
+    }
+
+    .month-section {
+      margin-bottom: 20px;
+      border-top: 2px solid #e5e7eb;
+      padding-top: 16px;
+    }
+
+    .month-section:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .month-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .month-total {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--secondary);
+      background: #ecfdf5;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .expense-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #f3f4f6;
+    }
+
+    .expense-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .expense-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .expense-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .expense-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .expense-amount {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      min-width: 80px;
+      text-align: left;
+    }
+
+    .expense-delete {
+      background: none;
+      border: none;
+      color: #d1d5db;
+      cursor: pointer;
+      padding: 6px;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+
+    .expense-delete:active {
+      color: var(--danger);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #bae6fd;
+    }
+
+    .stat-card.total {
+      background: var(--bg-gradient);
+      border: none;
+      color: white;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      opacity: 0.85;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 0.95rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--secondary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-tab {
+      padding: 8px 14px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>💰 مدیریت هزینه ماهانه</h1>
+      <p>هزینه‌های خود را ثبت و مدیریت کنید</p>
+    </header>
+
+    <!-- فرم ثبت هزینه -->
+    <div class="card">
+      <h2 class="card-title">ثبت هزینه جدید</h2>
+      
+      <div class="form-group">
+        <label>نام شخص</label>
+        <div class="input-wrapper">
+          <input type="text" id="personName" placeholder="نام خود را وارد کنید" autocomplete="off">
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>ماه</label>
+          <select id="month">
+            <option value="فروردین">فروردین</option>
+            <option value="اردیبهشت">اردیبهشت</option>
+            <option value="خرداد">خرداد</option>
+            <option value="تیر">تیر</option>
+            <option value="مرداد">مرداد</option>
+            <option value="شهریور">شهریور</option>
+            <option value="مهر">مهر</option>
+            <option value="آبان">آبان</option>
+            <option value="آذر">آذر</option>
+            <option value="دی">دی</option>
+            <option value="بهمن">بهمن</option>
+            <option value="اسفند">اسفند</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>مبلغ (تومان)</label>
+          <input type="number" id="amount" placeholder="250000" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>شرح هزینه</label>
+        <input type="text" id="description" placeholder="مثال: خرید مواد غذایی">
+      </div>
+
+      <button class="btn btn-primary" id="addBtn">➕ افزودن هزینه</button>
+    </div>
+
+    <!-- آمار -->
+    <div class="card">
+      <h2 class="card-title">آمار هزینه‌ها</h2>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalAmount">۰</div>
+          <div class="stat-label">مجموع کل</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- لیست هزینه‌ها -->
+    <div class="card">
+      <h2 class="card-title">لیست هزینه‌ها</h2>
+      
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">همه</button>
+      </div>
+
+      <div id="expenseList"></div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ چاپ</button>
+        <button class="btn btn-danger" onclick="clearAllData()">🗑️ حذف همه</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ====== کش DOM ======
+    const DOM = {
+      personName: document.getElementById('personName'),
+      month: document.getElementById('month'),
+      amount: document.getElementById('amount'),
+      description: document.getElementById('description'),
+      addBtn: document.getElementById('addBtn'),
+      expenseList: document.getElementById('expenseList'),
+      statsGrid: document.getElementById('statsGrid'),
+      totalAmount: document.getElementById('totalAmount'),
+      filterTabs: document.getElementById('filterTabs'),
+      suggestions: document.getElementById('suggestions'),
+      toast: document.getElementById('toast')
+    };
+
+    const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
+    let expenses = [];
+    let knownNames = [];
+    let filterState = 'all';
+
+    // ====== توابع ======
+    function toPersianNumber(num) {
+      return String(num).replace(/\d/g, d => PERSIAN_DIGITS[d]);
+    }
+
+    function formatAmount(amount) {
+      return toPersianNumber(Math.round(amount).toLocaleString('en-US'));
+    }
+
+    function loadData() {
+      const stored = localStorage.getItem('expenses');
+      expenses = stored ? JSON.parse(stored) : [];
+      knownNames = JSON.parse(localStorage.getItem('knownNames') || '[]');
+      render();
+    }
+
+    function saveData() {
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+      localStorage.setItem('knownNames', JSON.stringify(knownNames));
+    }
+
+    function showToast(msg, type = 'success') {
+      DOM.toast.textContent = msg;
+      DOM.toast.className = `toast ${type} show`;
+      setTimeout(() => DOM.toast.classList.remove('show'), 2500);
+    }
+
+    function showSuggestions(val) {
+      val = val.toLowerCase().trim();
+      if (!val) {
+        DOM.suggestions.classList.remove('show');
+        return;
+      }
+      const filtered = knownNames.filter(n => n.toLowerCase().includes(val)).slice(0, 5);
+      if (filtered.length) {
+        DOM.suggestions.innerHTML = filtered.map(n => `<div class="suggestion-item" onclick="selectName('${n}')">${n}</div>`).join('');
+        DOM.suggestions.classList.add('show');
+      } else {
+        DOM.suggestions.classList.remove('show');
+      }
+    }
+
+    function selectName(name) {
+      DOM.personName.value = name;
+      DOM.suggestions.classList.remove('show');
+    }
+
+    function updateNames() {
+      const names = [...new Set(expenses.map(e => e.name))];
+      knownNames = names.sort();
+      saveData();
+      updateFilterTabs();
+    }
+
+    function updateFilterTabs() {
+      const names = [...new Set(expenses.map(e => e.name))].sort();
+      DOM.filterTabs.innerHTML = '<button class="filter-tab active" data-filter="all" onclick="setFilter(\'all\', this)">همه</button>' +
+        names.map(n => `<button class="filter-tab" onclick="setFilter('${n}', this)">${n}</button>`).join('');
+    }
+
+    function setFilter(filter, btn) {
+      filterState = filter;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function render() {
+      const filtered = filterState === 'all' ? expenses : expenses.filter(e => e.name === filterState);
+      
+      if (!filtered.length) {
+        DOM.expenseList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p class="empty-state-text">هنوز هزینه‌ای ثبت نشده</p></div>';
+        updateStats();
+        return;
+      }
+
+      // گروپ بندی بر اساس ماه
+      const grouped = {};
+      filtered.forEach(e => {
+        if (!grouped[e.month]) grouped[e.month] = [];
+        grouped[e.month].push(e);
+      });
+
+      // ترتیب ماه‌ها
+      const orderedMonths = MONTHS.filter(m => grouped[m]);
+
+      let html = '';
+      orderedMonths.forEach(month => {
+        const monthExpenses = grouped[month];
+        const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+        
+        html += `<div class="month-section">
+          <div class="month-header">
+            <span>${month}</span>
+            <span class="month-total">${formatAmount(monthTotal)} تومان</span>
+          </div>`;
+
+        monthExpenses.forEach(e => {
+          html += `<div class="expense-item">
+            <div class="expense-icon">💵</div>
+            <div class="expense-details">
+              <div class="expense-name">${e.name}</div>
+              <div class="expense-desc">${e.description}</div>
+            </div>
+            <div class="expense-amount">${formatAmount(e.amount)}</div>
+            <button class="expense-delete" onclick="deleteExpense(${e.id})">✕</button>
+          </div>`;
+        });
+
+        html += '</div>';
+      });
+
+      DOM.expenseList.innerHTML = html;
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = expenses.reduce((s, e) => s + e.amount, 0);
+      DOM.totalAmount.textContent = formatAmount(total) + ' تومان';
+
+      const byPerson = {};
+      expenses.forEach(e => {
+        byPerson[e.name] = (byPerson[e.name] || 0) + e.amount;
+      });
+
+      let statsHtml = `<div class="stat-card total">
+        <div class="stat-value">${formatAmount(total)} تومان</div>
+        <div class="stat-label">مجموع کل</div>
+      </div>`;
+
+      Object.entries(byPerson).forEach(([name, amount]) => {
+        statsHtml += `<div class="stat-card">
+          <div class="stat-value">${formatAmount(amount)}</div>
+          <div class="stat-label">${name}</div>
+        </div>`;
+      });
+
+      DOM.statsGrid.innerHTML = statsHtml;
+    }
+
+    function addExpense() {
+      const name = DOM.personName.value.trim();
+      const month = DOM.month.value;
+      const amount = parseInt(DOM.amount.value);
+      const desc = DOM.description.value.trim();
+
+      if (!name || !amount || !desc) {
+        showToast('لطفاً همه فیلدها را پر کنید', 'error');
+        return;
+      }
+
+      expenses.unshift({ id: Date.now(), name, month, amount, desc });
+      updateNames();
+      saveData();
+      render();
+
+      DOM.personName.value = '';
+      DOM.amount.value = '';
+      DOM.description.value = '';
+
+      showToast('هزینه افزوده شد');
+    }
+
+    function deleteExpense(id) {
+      if (confirm('حذف این هزینه؟')) {
+        expenses = expenses.filter(e => e.id !== id);
+        updateNames();
+        saveData();
+        render();
+        showToast('هزینه حذف شد');
+      }
+    }
+
+    function clearAllData() {
+      if (confirm('حذف همه هزینه‌ها؟')) {
+        expenses = [];
+        localStorage.clear();
+        knownNames = [];
+        render();
+        showToast('همه حذف شد');
+      }
+    }
+
+    // ====== Events ======
+    DOM.addBtn.addEventListener('click', addExpense);
+
+    DOM.personName.addEventListener('input', e => showSuggestions(e.target.value));
+    DOM.personName.addEventListener('blur', () => setTimeout(() => DOM.suggestions.classList.remove('show'), 150));
+
+    DOM.amount.addEventListener('keypress', e => {
+      if (e.key === 'Enter') addExpense();
+    });
+
+    DOM.description.addEventListener('keypress', e => {
+      if (e.key === 'Enter') addExpense();
+    });
+
+    // شروع
+    loadData();
+  </script>
+</body>
+</html>
